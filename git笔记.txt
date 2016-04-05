@@ -1,0 +1,211 @@
+ssh-keygen -t rsa -C “2605683294@qq.com"    生成sshkey
+
+把GITHUB与本地仓库相关联
+git remote add origin https://github.com/kensir/sunweihome.git（需要输入用户名和密码）
+或者：git remote add origin git@github.com:kensir/sunweihome.git
+此时已经和远程仓库之间建立了链接但是远程仓库里面并没有本地仓库的内容
+
+将所有的内容推送到GITHUB上
+git push -u origin master
+犹豫现在远程仓库里面并没有任何的文件存在，所以以上是将所有文件进行 推送，但是犹豫是第一次推送，而且推送的为master分支，那么使用了一个‘-u“的参数将远程的master和本地的master相关联
+
+查看在远程服务器端已经存在的仓库信息
+git remote -v
+
+
+删掉仓库
+git remote rm 仓库名
+
+提交到服务器上
+git commit -a -m "描述"
+这个时候只是将其增加到了本地的master分支上，远程上的还没改变
+
+
+客户端像服务器端的代码推送
+git push origin master   (之后会让输入用户名密码)
+master->master合并成功
+
+
+ 
+克隆仓库
+1.在github上初始化一个新的仓库，选中Initialize this repository with a README，表示自动为为用户进行仓库初始化，并创建一个readme文件，创建完成之后看看内容
+
+2.在本地磁盘上进行仓库克隆
+git clone https://github.com/liligithub1990/fanback.git
+换一个新目录，开发者最好直接克隆远程仓库
+
+git status   查看状态
+
+
+分支
+切换到子分支上进行开发
+1.创建一个分支
+git branch brh
+2.当分支创建完成之后可以查看
+git branch
+3.切换到brh分支
+git checkout brh
+
+出现这个错误：If no other git process is currently running, this probably means a 
+git process crashed in this repository earlier. Make sure no other git 
+process is running and remove the file manually to continue. 
+解决方法：
+rm -f ./.git/index.lock
+
+
+创建并切换分支：
+git checkout -b brh       建立分支的同时可以自动的切换到子分支
+如果有这个分支了，可以删↓
+git checkout master       想要删除子分支，不能在当前分支上，所以先切换回master分支
+git branch -d brh         删除子分支
+
+在子分支上将修改进行提交
+git commit -a -m "text"
+
+
+将两个分支都提交到远程服务器上
+ git remote set-url origin https://github.com/liligithub1990/fanback.git
+ git push origin master
+ git push origin brh
+
+ 最终发布的版本一定是master分支上，所以要合并
+ git merge brh：          “fast-forward”表示快速合并方式
+这个时候会出现问题，两个相同文件名会有冲突，在master上add，commit
+如果说什么MERGE_HEAD exists，就git merge --abort  或者git reset --merge
+
+提交master分支:git push origin master
+
+
+ 删除远程分支
+ git push origin --delete brh
+
+
+分支操作管理
+1.创建并切换分支：
+git checkout -b brh
+2.在分支上建立文件：
+git add .
+git commit -a -m "add new file"
+3.改变分支的名称：
+git branch -m brh lybrh
+4.将分支推送到远程服务器端：
+git push origin lybrh
+5.在查看分支：
+查看全部分支：git branch -a
+查看远程分支：git branch -r
+查看本地分支：git branch -l
+6.删除分支：
+git branch -d lybrh
+此时会提示不能删除，因为所作出的修改还没有进行合并，想强制删除可以使用"-D"
+git branch -D lybrh
+
+删除远程分支：
+1.git push origin --delete lybrh
+2.git branch lybrh     git push origin :lybrh        //推送一个空分支
+
+
+
+冲突解决：
+1.切换到brh分支上    git checkout -b brh
+2.在brh上修改文件
+3.git commit -a -m "add";
+4.切换到master分支  git checkout master
+5.在master上也修改这个文件
+6.合并分支:git merge brh
+出现：Auto-merging master.txt
+CONFLICT (content): Merge conflict in master.txt
+Automatic merge failed; fix conflicts and then commit the result.
+证明是git帮我们自动解决了冲突问题
+merging状态结束：git reset HEAD
+
+查看修改日志：
+git log --graph --pretty=oneline
+
+
+分支管理策略：
+1.创建一个新的分支
+git checkout -b newbrh;
+2.创建一个文件
+3.git add .    git commit -m "add fn.file"
+4.切换回master分支 git chenkout master
+5.git merge --no-ff -m "no fast"
+
+
+
+分支暂存：
+1.git checkout -b brh
+2.建个新文件
+3.git add .
+4.git stash    将工作暂存
+5.git status
+6.git checkout master
+7.git checkout -b dev 
+8.在新的分支中修改文件
+9.git commit -a -m "dev change"
+10.切换回master并合并提交:git checkout master
+11.git merge --no-ff -m "merge dev" dev 然后可以删了
+12.回到刚才暂存的状态:git stash list
+13.从暂存区恢复
+形式1：
+   git stash apply
+   git stash drop
+形式2：
+   git stash pop
+14.提交:git commit -a -m "change"
+git branch -d brh
+
+
+
+补丁：patch
+1.利用git diff 生成标准的patch
+有一个文件
+2.建立一个新的分支git checkout -b cbrh
+3.修改文件
+4.而后查看前后代码的不同
+git diff 文件名   查看前后对比情况
+5.git commit -a -m "add Attr"
+6.生成补丁文件:git diff master > mypat
+7.切换回master分支 git checkout master
+8.切换并生成新的分支 git checkout -b patchbrh
+9.应用补丁信息   git apply mypat   此时补丁可以成功使用
+10.提交补丁操作   git commit -a -m "padch apply"
+11.git checkout master
+12.git merge --no-ff -m "buding" patchbrh
+
+利用git format-patch 生成git专用补丁：
+1.git checkout -b cbrh
+2.修改文件
+3.git commit -a -m "add method"
+4.与原始代码做一个比较，比较后会自动生成补丁文件  git format-patch-M master 
+5.git checkout master 
+6.git checkout -b patchbrh
+7.利用git am命令  git am +补丁名称(email格式的补丁文件)
+8.git commit -a -m "patch"   可以成功应用补丁进行代码更正
+
+
+
+多人合作：
+1.git checkout -b brh
+2.建立新的文件
+3.git add .  git commit -a -m "add file"
+4.git push origin brh    git push origin master
+5.模拟第二个开发者 开一个新的命令行窗口   git clone https://github.com/liligithub1990/fanback.git
+6.[二号]git branch -a
+7.[二号]git checkout -b brh
+8.[二号]将远程服务器上的brh的内容拷贝到本地的brh分支上   git merge origin/brh
+9.[二号]git add . git commit -m "add new"
+10.[二号]git push origin brh 
+11.[一号]取得最新的分支数据
+·git fetch:取得最新分支数据，不会merge合并
+·git pull :取得最新分支数据，并会合并
+12.[一号]git branch --set-upstream-to=origin/brh
+13.[一号]git pull   实现了代码更新关联
+14.[二号]修改某个文件 ,git add .  git commit -a -m "update"
+15.[二号]git push origin brh
+16.[一号]也修改了这个文件,git add . git commit -a -m "update1"
+17.[一号]抓取最新的更新数据git pull（产生冲突了）
+18.[一号]手工解决文件内容
+20.git commit -a -m "3" git push origin brh
+成功扩充到远程的冲突
+
+
